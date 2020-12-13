@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 
 WIDTH = 480
 HEIGHT = 600
@@ -11,13 +12,30 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+
+# Игра и окно
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("!!!GALAXY ATTACK!!!")
+clock = pygame.time.Clock()
+
+# Загрузка всей игровой графики
+main = os.path.dirname(__file__)
+img_folder = os.path.join(main, "img")
+
+background = pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert()
+background_rect = background.get_rect()
+player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
+meteor_img = pygame.image.load(os.path.join(img_folder, "meteorBrown_med1.png")).convert()
+bullet_img = pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert()
 
 # Класс игрока
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((50,40))
-        self.image.fill(GREEN)
+        self.image = pygame.transform.scale(player_img, (50, 40)) 
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH//2
         self.rect.bottom = HEIGHT-25
@@ -46,8 +64,8 @@ class Player(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((30, 40))
-        self.image.fill(RED)
+        self.image = meteor_img
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -40)
@@ -67,8 +85,8 @@ class Mob(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((10, 20))
-        self.image.fill(BLUE)
+        self.image = bullet_img
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.bottom = y
@@ -76,7 +94,7 @@ class Bullet(pygame.sprite.Sprite):
         
     def update(self):
         self.rect.y += self.speedy
-        # Убить, если он заходит за верхнюю часть экрана
+        # Убить, если  пуля заходит за верхнюю часть экрана
         if self.rect.bottom < 0:
             self.kill()
 
@@ -91,12 +109,6 @@ for _ in range(8):
     m = Mob()
     all_sprites.add(m)
     mobs.add(m)
-
-# Игра и окно
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("!!!GALAXY ATTACK!!!")
-clock = pygame.time.Clock()
 
 # Цикл игры
 GAME = True
@@ -125,7 +137,7 @@ while GAME:
     all_sprites.update()
 
     # Рендеринг
-    screen.fill((BLACK))
+    screen.blit(background, background_rect)
     all_sprites.draw(screen)
 
     # Обновление дисплея
