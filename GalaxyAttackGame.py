@@ -37,9 +37,12 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(player_img, (50, 40)) 
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
+        self.radius = 20
+        #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.centerx = WIDTH//2
         self.rect.bottom = HEIGHT-25
         self.speedx = 0
+        
 
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
@@ -67,6 +70,8 @@ class Mob(pygame.sprite.Sprite):
         self.image = meteor_img
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
+        self.radius = int(self.rect.width*0.85//2)
+        #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -40)
         self.speedx = random.randrange(-2, 2)
@@ -122,7 +127,7 @@ while GAME:
                 player.shoot()
 
     # Проверка, не ударил ли моб игрока
-    hit_with_player = pygame.sprite.spritecollide(player, mobs, True)
+    hit_with_player = pygame.sprite.spritecollide(player, mobs, False, pygame.sprite.collide_circle)
     if hit_with_player:
         GAME = False
 
