@@ -27,8 +27,16 @@ img_folder = os.path.join(main, "img")
 background = pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert()
 background_rect = background.get_rect()
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
-meteor_img = pygame.image.load(os.path.join(img_folder, "meteorBrown_med1.png")).convert()
+#meteor_img = pygame.image.load(os.path.join(img_folder, "meteorBrown_med1.png")).convert()
 bullet_img = pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert()
+
+meteor_images = []
+meteor_images_list =['meteorBrown_big1.png','meteorBrown_med1.png',
+              'meteorBrown_med1.png','meteorBrown_med3.png',
+              'meteorBrown_small1.png','meteorBrown_small2.png',
+              'meteorBrown_tiny1.png']
+for img in meteor_images_list:
+    meteor_images.append(pygame.image.load(os.path.join(img_folder, img)).convert())
 
 # Класс игрока
 class Player(pygame.sprite.Sprite):
@@ -67,13 +75,13 @@ class Player(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = meteor_img
+        self.image = random.choice(meteor_images)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width*0.85//2)
         #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.x = random.randrange(WIDTH - self.rect.width)
-        self.rect.y = random.randrange(-100, -40)
+        self.rect.y = random.randrange(-100, -60)
         self.speedx = random.randrange(-2, 2)
         self.speedy = random.randrange(1, 8)
 
@@ -82,7 +90,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.x += self.speedx
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 25:
             self.rect.x = random.randrange(WIDTH - self.rect.width)
-            self.rect.y = random.randrange(-100, -40)
+            self.rect.y = random.randrange(-100, -60)
             self.speedx = random.randrange(-2, 2)
             self.speedy = random.randrange(1, 8)
 
