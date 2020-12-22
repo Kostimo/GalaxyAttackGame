@@ -123,6 +123,16 @@ for _ in range(8):
     all_sprites.add(m)
     mobs.add(m)
 
+score = 0
+
+font_name = pygame.font.match_font("ObelixPro")
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    surface_font = font.render(text, True, WHITE)
+    surface_font_rect = surface_font.get_rect()
+    surface_font_rect.midtop = (x,y)
+    surf.blit(surface_font, surface_font_rect)
+
 # Цикл игры
 GAME = True
 while GAME:
@@ -140,8 +150,9 @@ while GAME:
         GAME = False
 
     # Проверка столкновений пуль и мобов
-    hits_with_bullets = pygame.sprite.groupcollide(bullets, mobs, True, True)
+    hits_with_bullets = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits_with_bullets:
+        score += 50 - hit.radius
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
@@ -152,6 +163,7 @@ while GAME:
     # Рендеринг
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
+    draw_text(screen, str(score), 18, WIDTH//2, 25)
 
     # Обновление дисплея
     pygame.display.flip()
