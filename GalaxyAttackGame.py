@@ -1,3 +1,4 @@
+'''Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3'''
 import pygame
 import random
 import os
@@ -23,11 +24,11 @@ clock = pygame.time.Clock()
 # Загрузка всей игровой графики
 main = os.path.dirname(__file__)
 img_folder = os.path.join(main, "img")
+snd_folder = os.path.join(main, "snd")
 
 background = pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert()
 background_rect = background.get_rect()
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
-#meteor_img = pygame.image.load(os.path.join(img_folder, "meteorBrown_med1.png")).convert()
 bullet_img = pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert()
 
 meteor_images = []
@@ -37,6 +38,14 @@ meteor_images_list =['meteorBrown_big1.png','meteorBrown_med1.png',
               'meteorBrown_tiny1.png']
 for img in meteor_images_list:
     meteor_images.append(pygame.image.load(os.path.join(img_folder, img)).convert())
+
+# Загрузка мелодий игры
+shoot_sound = pygame.mixer.Sound(os.path.join(snd_folder, "pew.wav"))
+expl_sounds = []
+for expl in ("expl1.wav", "expl2.wav"):
+    expl_sounds.append(pygame.mixer.Sound(os.path.join(snd_folder, expl)))
+pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoop.mp3"))
+# pygame.mixer.music.set_volume(0.7)
 
 # Класс игрока
 class Player(pygame.sprite.Sprite):
@@ -56,6 +65,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        shoot_sound.play()
 
     def update(self):
         self.speedx = 0
@@ -133,6 +143,7 @@ def draw_text(surf, text, size, x, y):
     surface_font_rect.midtop = (x,y)
     surf.blit(surface_font, surface_font_rect)
 
+pygame.mixer.music.play(loops=-1)
 # Цикл игры
 GAME = True
 while GAME:
@@ -153,6 +164,7 @@ while GAME:
     hits_with_bullets = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits_with_bullets:
         score += 50 - hit.radius
+        random.choice(expl_sounds).play()
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
