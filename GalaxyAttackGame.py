@@ -51,6 +51,7 @@ pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoo
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+        self.shield = 100
         self.image = pygame.transform.scale(player_img, (50, 40)) 
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
@@ -128,10 +129,14 @@ bullets = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
-for _ in range(8):
+def new_mob():
     m = Mob()
     all_sprites.add(m)
     mobs.add(m)
+
+for _ in range(8):
+    new_mob()
+
 score = 0
 
 # Рендеринг очков
@@ -142,6 +147,18 @@ def draw_text(surf, text, size, x, y):
     surface_font_rect = surface_font.get_rect()
     surface_font_rect.midtop = (x,y)
     surf.blit(surface_font, surface_font_rect)
+
+# Здоровье
+def draw_shield_bar(surf, x, y, life_points):
+    if life_points < 0:
+        life_points = 0
+    BAR_WIDTH = 100;
+    BAR_HEIGHT = 10;
+    fill_width = (life_points/100)*BAR_WIDTH 
+    fill_rect = pygame.Rect(x, y, fill_width, BAR_HEIGHT)
+    border_rect = pygame.Rect(x, y, BAR_WIDTH, BAR_HEIGHT)
+    pygame.draw.rect(surf, WHITE, border_rect)
+    pygame.draw.rect(surf, RED, fill_rect) 
 
 pygame.mixer.music.play(loops=-1)
 # Цикл игры
@@ -156,18 +173,20 @@ while GAME:
                 player.shoot()
 
     # Проверка, не ударил ли моб игрока
-    hit_with_player = pygame.sprite.spritecollide(player, mobs, False, pygame.sprite.collide_circle)
-    if hit_with_player:
-        GAME = False
+    hits_with_player = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
+    for hit in hits_with_player:
+        player.shield -= hit.radius*2
+        new_mob()
+        if player.shield <= 0:
+            GAME = False
+        
 
     # Проверка столкновений пуль и мобов
     hits_with_bullets = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits_with_bullets:
         score += 50 - hit.radius
         random.choice(expl_sounds).play()
-        m = Mob()
-        all_sprites.add(m)
-        mobs.add(m)
+        new_mob()
 
     # Обновление спрайтов
     all_sprites.update()
@@ -176,6 +195,7 @@ while GAME:
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     draw_text(screen, str(score), 19, WIDTH//2, 20)
+    draw_shield_bar(screen, 5, 5, player.shield)
 
     # Обновление дисплея
     pygame.display.flip()
