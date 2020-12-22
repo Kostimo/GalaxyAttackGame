@@ -122,9 +122,9 @@ for _ in range(8):
     m = Mob()
     all_sprites.add(m)
     mobs.add(m)
-
 score = 0
 
+# Рендеринг очков
 font_name = pygame.font.match_font("ObelixPro")
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
@@ -163,7 +163,7 @@ while GAME:
     # Рендеринг
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
-    draw_text(screen, str(score), 18, WIDTH//2, 25)
+    draw_text(screen, str(score), 19, WIDTH//2, 20)
 
     # Обновление дисплея
     pygame.display.flip()
