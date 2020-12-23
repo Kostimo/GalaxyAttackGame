@@ -29,6 +29,8 @@ snd_folder = os.path.join(main, "snd")
 background = pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert()
 background_rect = background.get_rect()
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
+player_mini_img = pygame.transform.scale(player_img, (25,19))
+player_mini_img.set_colorkey(BLACK)
 bullet_img = pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert()
 
 meteor_images = []
@@ -69,6 +71,9 @@ pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoo
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+        self.lives = 3
+        self.hidden = False
+        self.hide_timer = pygame.time.get_ticks()
         self.shield = 100
         self.image = pygame.transform.scale(player_img, (50, 40)) 
         self.image.set_colorkey(BLACK)
@@ -79,12 +84,17 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT-25
         self.speedx = 0
         
-
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
         shoot_sound.play()
+
+    def hide(self):
+        self.hidden = True
+        self.hide_timer = pygame.time.get_ticks()
+        self.rect.center = (WIDTH / 2, HEIGHT + 200)
+
 
     def update(self):
         self.speedx = 0
@@ -98,6 +108,11 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
+        now = pygame.time.get_ticks()
+        if  self.hidden and now - self.hide_timer >= 1000:
+            self.hidden = False
+            self.rect.centerx = WIDTH // 2
+            self.rect.bottom = HEIGHT-25
         
 
 # Класс моба
@@ -204,6 +219,14 @@ def draw_shield_bar(surf, x, y, life_points):
     pygame.draw.rect(surf, WHITE, border_rect)
     pygame.draw.rect(surf, RED, fill_rect) 
 
+# Кол-во жизней
+def draw_lives(surf, x, y, lives, img): 
+    for i in range(lives):
+        img_rect = img.get_rect()
+        img_rect.x = x + 30*i
+        img_rect.y = y
+        surf.blit(img, img_rect)
+
 pygame.mixer.music.play(loops=-1)
 # Цикл игры
 GAME = True
@@ -226,9 +249,11 @@ while GAME:
         if player.shield <= 0:
             death_explosion = Explosion(player.rect.center, "player")
             all_sprites.add(death_explosion)
-            player.kill()
+            player.lives -= 1
+            player.shield = 100
+            player.hide()
 
-    if not player.alive() and not death_explosion.alive():
+    if player.lives == 0 and not death_explosion.alive():
         GAME = False
         
     # Проверка столкновений пуль и мобов
@@ -248,6 +273,7 @@ while GAME:
     all_sprites.draw(screen)
     draw_text(screen, str(score), 19, WIDTH//2, 20)
     draw_shield_bar(screen, 5, 5, player.shield)
+    draw_lives(screen, WIDTH-100, 5, player.lives, player_mini_img)
 
     # Обновление дисплея
     pygame.display.flip()
