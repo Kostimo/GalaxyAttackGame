@@ -59,12 +59,17 @@ for i in range(9):
     img.set_colorkey(BLACK)
     explosion_animation["player"].append(img)
 
+powerup_images = {
+    "shield": pygame.image.load(os.path.join(img_folder, "shield_silver.png")).convert(),
+    "weapon": pygame.image.load(os.path.join(img_folder, "bold_silver.png")).convert()
+}
+
 # Загрузка мелодий игры 
 shoot_sound = pygame.mixer.Sound(os.path.join(snd_folder, "pew.wav"))
 expl_sounds = []
 for expl in ("expl1.wav", "expl2.wav"):
     expl_sounds.append(pygame.mixer.Sound(os.path.join(snd_folder, expl)))
-pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoop.mp3"))
+m = pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoop.mp3"))
 # pygame.mixer.music.set_volume(0.7)
 
 # Класс игрока
@@ -181,9 +186,27 @@ class Explosion(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.center = center
 
+# Класс усилений
+class PowerUp(pygame.sprite.Sprite):
+    def __init__(self, center):
+        pygame.sprite.Sprite.__init__(self)
+        self.type = random.choice(["shield", "weapon"])
+        self.image = powerup_images[self.type]
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.speedy = 2
+        
+    def update(self):
+        self.rect.y += self.speedy
+        # Убить, если заходит за нижнюю часть экрана
+        if self.rect.bottom > HEIGHT:
+            self.kill()
+
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+powerups = pygame.sprite.Group()
 
 player = Player()
 all_sprites.add(player)
@@ -264,6 +287,20 @@ while GAME:
         large_expl = Explosion(hit.rect.center, "large")
         all_sprites.add(large_expl)
         new_mob()
+        if random.random() > 0.9:
+             pow = PowerUp(hit.rect.center)
+             all_sprites.add(pow)
+             powerups.add(pow)
+             
+    # Проверка столкновений игрок и усилений
+    hits_with_powerups = pygame.sprite.spritecollide(player, powerups, True)
+    for hit in hits_with_powerups:
+        if hit.type == "shield":
+            player.shield += random.randrange(10, 30)
+            if player.shield >= 100:
+                player.shield = 100
+        if hit.type == "weapon":
+            pass
 
     # Обновление спрайтов
     all_sprites.update()
