@@ -73,7 +73,7 @@ shoot_sound = pygame.mixer.Sound(os.path.join(snd_folder, "pew.wav"))
 expl_sounds = []
 for expl in ("expl1.wav", "expl2.wav"):
     expl_sounds.append(pygame.mixer.Sound(os.path.join(snd_folder, expl)))
-m = pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoop.mp3"))
+pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoop.mp3"))
 # pygame.mixer.music.set_volume(0.7)
 
 # Класс игрока
