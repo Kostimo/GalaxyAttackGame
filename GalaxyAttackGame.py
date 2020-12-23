@@ -34,7 +34,7 @@ player_mini_img.set_colorkey(BLACK)
 
 weapons = {
     "bullet": pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert(),
-    "laser": pygame.image.load(os.path.join(img_folder, "laserRed.jpg")).convert()
+    "laser": pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "laserRed.jpg")).convert(), (11,10))
 }
 
 meteor_images = []
@@ -132,7 +132,7 @@ class Player(pygame.sprite.Sprite):
             self.hidden = False
             self.rect.centerx = WIDTH // 2
             self.rect.bottom = HEIGHT-25
-        if self.super and now - self.super_timer >= 1500:
+        if self.super and now - self.super_timer >= 4500:
             self.super = False
         
 
