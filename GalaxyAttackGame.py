@@ -39,7 +39,25 @@ meteor_images_list =['meteorBrown_big1.png','meteorBrown_med1.png',
 for img in meteor_images_list:
     meteor_images.append(pygame.image.load(os.path.join(img_folder, img)).convert())
 
-# Загрузка мелодий игры
+explosion_animation = {
+    "large": [],
+    "small": [],
+    "player": []
+}
+for i in range(9):
+    filename = f'regularExplosion0{i}.png'
+    img = pygame.image.load(os.path.join(img_folder, filename)).convert()
+    img.set_colorkey(BLACK)
+    img_large = pygame.transform.scale(img, (75, 75))
+    explosion_animation['large'].append(img_large)
+    img_small = pygame.transform.scale(img, (32, 32))
+    explosion_animation['small'].append(img_small)
+    filename = f"sonicExplosion0{i}.png"
+    img = pygame.image.load(os.path.join(img_folder, filename)).convert()
+    img.set_colorkey(BLACK)
+    explosion_animation["player"].append(img)
+
+# Загрузка мелодий игры 
 shoot_sound = pygame.mixer.Sound(os.path.join(snd_folder, "pew.wav"))
 expl_sounds = []
 for expl in ("expl1.wav", "expl2.wav"):
@@ -122,6 +140,32 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
+# Класс анимации взрывов
+class Explosion(pygame.sprite.Sprite):
+    FRAME_RATE = 50
+
+    def __init__(self, center, type):
+        pygame.sprite.Sprite.__init__(self)
+        self.type = type
+        self.image = explosion_animation[self.type][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > Explosion.FRAME_RATE:
+            self.last_update = now
+            self.frame += 1
+            if self.frame == len(explosion_animation[self.type]):
+                self.kill()
+            else:
+                center = self.rect.center
+                self.image = explosion_animation[self.type][self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center
+
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
@@ -176,16 +220,24 @@ while GAME:
     hits_with_player = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
     for hit in hits_with_player:
         player.shield -= hit.radius*2
+        small_expl = Explosion(hit.rect.center, "small")
+        all_sprites.add(small_expl)
         new_mob()
         if player.shield <= 0:
-            GAME = False
-        
+            death_explosion = Explosion(player.rect.center, "player")
+            all_sprites.add(death_explosion)
+            player.kill()
 
+    if not player.alive() and not death_explosion.alive():
+        GAME = False
+        
     # Проверка столкновений пуль и мобов
     hits_with_bullets = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits_with_bullets:
         score += 50 - hit.radius
         random.choice(expl_sounds).play()
+        large_expl = Explosion(hit.rect.center, "large")
+        all_sprites.add(large_expl)
         new_mob()
 
     # Обновление спрайтов
