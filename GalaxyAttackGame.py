@@ -31,7 +31,11 @@ background_rect = background.get_rect()
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25,19))
 player_mini_img.set_colorkey(BLACK)
-bullet_img = pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert()
+
+weapons = {
+    "bullet": pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert(),
+    "laser": pygame.image.load(os.path.join(img_folder, "laserRed.jpg")).convert()
+}
 
 meteor_images = []
 meteor_images_list =['meteorBrown_big1.png','meteorBrown_med1.png',
@@ -78,6 +82,8 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.lives = 3
         self.hidden = False
+        self.super = False
+        self.super_timer = pygame.time.get_ticks()
         self.hide_timer = pygame.time.get_ticks()
         self.shield = 100
         self.image = pygame.transform.scale(player_img, (50, 40)) 
@@ -90,7 +96,13 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
         
     def shoot(self):
-        bullet = Bullet(self.rect.centerx, self.rect.top)
+        bullet = Bullet(self.rect.centerx, self.rect.top, "bullet")
+        all_sprites.add(bullet)
+        bullets.add(bullet)
+        shoot_sound.play()
+    
+    def super_shoot(self):
+        bullet = Bullet(self.rect.centerx+1, self.rect.top-2, "laser")
         all_sprites.add(bullet)
         bullets.add(bullet)
         shoot_sound.play()
@@ -104,6 +116,8 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.speedx = 0
         keys = pygame.key.get_pressed()
+        if self.super and keys[pygame.K_k]:
+            self.super_shoot()
         if keys[pygame.K_a]:
             self.speedx = -8
         if keys[pygame.K_d]:
@@ -118,6 +132,8 @@ class Player(pygame.sprite.Sprite):
             self.hidden = False
             self.rect.centerx = WIDTH // 2
             self.rect.bottom = HEIGHT-25
+        if self.super and now - self.super_timer >= 1500:
+            self.super = False
         
 
 # Класс моба
@@ -145,9 +161,10 @@ class Mob(pygame.sprite.Sprite):
 
 # Класс пули
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, type):
         pygame.sprite.Sprite.__init__(self)
-        self.image = bullet_img
+        self.type = type
+        self.image = weapons[self.type]
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.centerx = x
@@ -300,7 +317,8 @@ while GAME:
             if player.shield >= 100:
                 player.shield = 100
         if hit.type == "weapon":
-            pass
+            player.super = True
+            player.super_timer = pygame.time.get_ticks()
 
     # Обновление спрайтов
     all_sprites.update()
