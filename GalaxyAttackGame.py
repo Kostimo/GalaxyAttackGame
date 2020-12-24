@@ -223,22 +223,22 @@ class PowerUp(pygame.sprite.Sprite):
             self.kill()
 
 # Фон
-class Background(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = background2
-        self.rect = background_rect
-        self.y = self.rect.y
+# class Background(pygame.sprite.Sprite):
+#     def __init__(self):
+#         pygame.sprite.Sprite.__init__(self)
+#         self.image = background2
+#         self.rect = background_rect
+#         self.y = self.rect.y
         
-    def update(self):
-        self.rect.y += 2
-        if self.rect.y == HEIGHT:
-            self.rect.y = self.y
+#     def update(self):
+#         self.rect.y += 2
+#         if self.rect.y == HEIGHT:
+#             self.rect.y = self.y
 
-def new_mob():
-    m = Mob()
-    all_sprites.add(m)
-    mobs.add(m)
+# def new_mob():
+#     m = Mob()
+#     all_sprites.add(m)
+#     mobs.add(m)
 
 # Текст
 font_name = pygame.font.match_font("ObelixPro")
@@ -279,11 +279,13 @@ def show_menu_screen():
     pygame.display.flip()
     waiting = True
     while waiting:
+        menu_time = pygame.time.get_ticks()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYUP:
                 waiting = False
+    return menu_time
 
 # Цикл игры
 MENU = True
@@ -293,7 +295,7 @@ while GAME:
     if MENU:
         pygame.mixer.music.set_volume(0.2)
         MENU = False
-        show_menu_screen()
+        menu_time = show_menu_screen()
         all_sprites = pygame.sprite.Group()
         mobs = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
@@ -302,7 +304,7 @@ while GAME:
         bg.add(Background())
         player = Player()
         all_sprites.add(player)
-        for _ in range(8):
+        for _ in range(2):
             new_mob()
         score = 0
         
@@ -316,6 +318,29 @@ while GAME:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 player.shoot()
+
+    if 10000 <= pygame.time.get_ticks() - menu_time <= 10016:
+        for _ in range(2):
+            new_mob()
+    if 20000 <= pygame.time.get_ticks() - menu_time <= 20016:
+       for _ in range(2):
+            new_mob()
+    if 30000 <= pygame.time.get_ticks() - menu_time <= 30016:
+        for _ in range(2):
+            new_mob()
+    if 40000 <= pygame.time.get_ticks() - menu_time <= 40016:
+        for _ in range(2):
+            new_mob()
+    if 70000 <= pygame.time.get_ticks() - menu_time <= 70016:
+        for _ in range(4):
+            new_mob()
+    if 100000 <= pygame.time.get_ticks() - menu_time <= 100016:
+        for _ in range(2):
+            new_mob()
+    if 120000 <= pygame.time.get_ticks() - menu_time <= 120016:
+        for _ in range(6):
+            new_mob()
+
 
     # Проверка, не ударил ли моб игрока
     hits_with_player = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
