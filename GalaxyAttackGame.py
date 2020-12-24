@@ -9,7 +9,8 @@ FPS = 60
 
 # Цвета (R, G, B)
 BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
+WHITE_100 = (255, 255, 255)
+WHITE_90 = (230, 230, 230)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
@@ -18,7 +19,7 @@ YELLOW = (255, 255, 0)
 # Игра и окно
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("!!!GALAXY ATTACK!!!")
+pygame.display.set_caption("GALAXY ATTACK!!!")
 clock = pygame.time.Clock()
 
 # Загрузка всей игровой графики
@@ -26,8 +27,9 @@ main = os.path.dirname(__file__)
 img_folder = os.path.join(main, "img")
 snd_folder = os.path.join(main, "snd")
 
-background = pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert()
-background_rect = background.get_rect()
+background1 = pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert()
+background_rect = background1.get_rect()
+background2 = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert(), (480, 1200))
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25,19))
 player_mini_img.set_colorkey(BLACK)
@@ -74,7 +76,7 @@ expl_sounds = []
 for expl in ("expl1.wav", "expl2.wav"):
     expl_sounds.append(pygame.mixer.Sound(os.path.join(snd_folder, expl)))
 pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoop.mp3"))
-# pygame.mixer.music.set_volume(0.7)
+
 
 # Класс игрока
 class Player(pygame.sprite.Sprite):
@@ -110,13 +112,13 @@ class Player(pygame.sprite.Sprite):
     def hide(self):
         self.hidden = True
         self.hide_timer = pygame.time.get_ticks()
-        self.rect.center = (WIDTH / 2, HEIGHT + 200)
+        self.rect.center = (WIDTH/2, -200)
 
 
     def update(self):
         self.speedx = 0
         keys = pygame.key.get_pressed()
-        if self.super and keys[pygame.K_k]:
+        if self.super and keys[pygame.K_l]:
             self.super_shoot()
         if keys[pygame.K_a]:
             self.speedx = -8
@@ -132,7 +134,7 @@ class Player(pygame.sprite.Sprite):
             self.hidden = False
             self.rect.centerx = WIDTH // 2
             self.rect.bottom = HEIGHT-25
-        if self.super and now - self.super_timer >= 4500:
+        if self.super and now - self.super_timer >= 1500:
             self.super = False
         
 
@@ -148,16 +150,16 @@ class Mob(pygame.sprite.Sprite):
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -60)
         self.speedx = random.randrange(-2, 2)
-        self.speedy = random.randrange(1, 8)
+        self.speedy = random.randrange(1, 9)
 
     def update(self):
         self.rect.y += self.speedy
         self.rect.x += self.speedx
-        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 25:
+        if self.rect.top > HEIGHT + 10 or self.rect.left < (0-self.rect.width) or self.rect.right > (WIDTH + self.rect.width):
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -60)
             self.speedx = random.randrange(-2, 2)
-            self.speedy = random.randrange(1, 8)
+            self.speedy = random.randrange(1, 9)
 
 # Класс пули
 class Bullet(pygame.sprite.Sprite):
@@ -220,29 +222,29 @@ class PowerUp(pygame.sprite.Sprite):
         if self.rect.bottom > HEIGHT:
             self.kill()
 
-all_sprites = pygame.sprite.Group()
-mobs = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
-powerups = pygame.sprite.Group()
-
-player = Player()
-all_sprites.add(player)
+# Фон
+class Background(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = background2
+        self.rect = background_rect
+        self.y = self.rect.y
+        
+    def update(self):
+        self.rect.y += 2
+        if self.rect.y == HEIGHT:
+            self.rect.y = self.y
 
 def new_mob():
     m = Mob()
     all_sprites.add(m)
     mobs.add(m)
 
-for _ in range(8):
-    new_mob()
-
-score = 0
-
-# Рендеринг очков
+# Текст
 font_name = pygame.font.match_font("ObelixPro")
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
-    surface_font = font.render(text, True, WHITE)
+    surface_font = font.render(text, True, WHITE_90)
     surface_font_rect = surface_font.get_rect()
     surface_font_rect.midtop = (x,y)
     surf.blit(surface_font, surface_font_rect)
@@ -256,7 +258,7 @@ def draw_shield_bar(surf, x, y, life_points):
     fill_width = (life_points/100)*BAR_WIDTH 
     fill_rect = pygame.Rect(x, y, fill_width, BAR_HEIGHT)
     border_rect = pygame.Rect(x, y, BAR_WIDTH, BAR_HEIGHT)
-    pygame.draw.rect(surf, WHITE, border_rect)
+    pygame.draw.rect(surf, WHITE_100, border_rect)
     pygame.draw.rect(surf, RED, fill_rect) 
 
 # Кол-во жизней
@@ -267,11 +269,47 @@ def draw_lives(surf, x, y, lives, img):
         img_rect.y = y
         surf.blit(img, img_rect)
 
-pygame.mixer.music.play(loops=-1)
+# Экран-меню
+def show_menu_screen():
+    screen.blit(background1, background_rect)
+    draw_text(screen, "GALAXY ATTACK!!!", 40, WIDTH/2, HEIGHT/4)
+    draw_text(screen, "Keys \"A\" and \"D\" for movement", 20, WIDTH/2, HEIGHT/2)
+    draw_text(screen, "Space to fire , \"L\" for super", 20, WIDTH/2, HEIGHT/2 + 40)
+    draw_text(screen, "Press any key to start", 22, WIDTH/2, HEIGHT*0.75)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYUP:
+                waiting = False
+
 # Цикл игры
+MENU = True
 GAME = True
+pygame.mixer.music.play(loops=-1)
 while GAME:
+    if MENU:
+        pygame.mixer.music.set_volume(0.2)
+        MENU = False
+        show_menu_screen()
+        all_sprites = pygame.sprite.Group()
+        mobs = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        powerups = pygame.sprite.Group()
+        bg = pygame.sprite.Group()
+        bg.add(Background())
+        player = Player()
+        all_sprites.add(player)
+        for _ in range(8):
+            new_mob()
+        score = 0
+        
+    pygame.mixer.music.set_volume(1)
     clock.tick(FPS)
+    if player.lives == 0 and not death_explosion.alive():
+        MENU = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             GAME = False
@@ -282,7 +320,7 @@ while GAME:
     # Проверка, не ударил ли моб игрока
     hits_with_player = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
     for hit in hits_with_player:
-        player.shield -= hit.radius*2
+        player.shield -= hit.radius*3
         small_expl = Explosion(hit.rect.center, "small")
         all_sprites.add(small_expl)
         new_mob()
@@ -292,9 +330,6 @@ while GAME:
             player.lives -= 1
             player.shield = 100
             player.hide()
-
-    if player.lives == 0 and not death_explosion.alive():
-        GAME = False
         
     # Проверка столкновений пуль и мобов
     hits_with_bullets = pygame.sprite.groupcollide(mobs, bullets, True, True)
@@ -304,7 +339,7 @@ while GAME:
         large_expl = Explosion(hit.rect.center, "large")
         all_sprites.add(large_expl)
         new_mob()
-        if random.random() > 0.9:
+        if random.randint(0,100) > 97:
              pow = PowerUp(hit.rect.center)
              all_sprites.add(pow)
              powerups.add(pow)
@@ -324,7 +359,8 @@ while GAME:
     all_sprites.update()
 
     # Рендеринг
-    screen.blit(background, background_rect)
+    # screen.blit(background, background_rect)
+    bg.draw(screen)
     all_sprites.draw(screen)
     draw_text(screen, str(score), 19, WIDTH//2, 20)
     draw_shield_bar(screen, 5, 5, player.shield)
