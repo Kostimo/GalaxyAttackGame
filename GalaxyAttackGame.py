@@ -27,9 +27,8 @@ main = os.path.dirname(__file__)
 img_folder = os.path.join(main, "img")
 snd_folder = os.path.join(main, "snd")
 
-background1 = pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert()
-background_rect = background1.get_rect()
-background2 = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "starfield.jpg")).convert(), (480, 1200))
+background = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "black.png")).convert(), (WIDTH, HEIGHT))
+background_rect = background.get_rect()
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25,19))
 player_mini_img.set_colorkey(BLACK)
@@ -118,7 +117,7 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.speedx = 0
         keys = pygame.key.get_pressed()
-        if self.super and keys[pygame.K_l]:
+        if self.super and keys[pygame.K_k]:
             self.super_shoot()
         if keys[pygame.K_a]:
             self.speedx = -8
@@ -223,22 +222,23 @@ class PowerUp(pygame.sprite.Sprite):
             self.kill()
 
 # Фон
-# class Background(pygame.sprite.Sprite):
-#     def __init__(self):
-#         pygame.sprite.Sprite.__init__(self)
-#         self.image = background2
-#         self.rect = background_rect
-#         self.y = self.rect.y
+class Background (pygame.sprite.Sprite):
+    def __init__(self, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = background
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, -y + HEIGHT / 2)
+        self.y = y
         
-#     def update(self):
-#         self.rect.y += 2
-#         if self.rect.y == HEIGHT:
-#             self.rect.y = self.y
+    def update(self):
+        self.rect.y += 4
+        if self.rect.y >= HEIGHT*2:
+            self.rect.center = (WIDTH / 2, -self.y + HEIGHT / 2)
 
-# def new_mob():
-#     m = Mob()
-#     all_sprites.add(m)
-#     mobs.add(m)
+def new_mob():
+    m = Mob()
+    all_sprites.add(m)
+    mobs.add(m)
 
 # Текст
 font_name = pygame.font.match_font("ObelixPro")
@@ -271,10 +271,10 @@ def draw_lives(surf, x, y, lives, img):
 
 # Экран-меню
 def show_menu_screen():
-    screen.blit(background1, background_rect)
+    screen.blit(background, background_rect)
     draw_text(screen, "GALAXY ATTACK!!!", 40, WIDTH/2, HEIGHT/4)
     draw_text(screen, "Keys \"A\" and \"D\" for movement", 20, WIDTH/2, HEIGHT/2)
-    draw_text(screen, "Space to fire , \"L\" for super", 20, WIDTH/2, HEIGHT/2 + 40)
+    draw_text(screen, "Space to fire , \"K\" for super", 20, WIDTH/2, HEIGHT/2 + 40)
     draw_text(screen, "Press any key to start", 22, WIDTH/2, HEIGHT*0.75)
     pygame.display.flip()
     waiting = True
@@ -300,8 +300,8 @@ while GAME:
         mobs = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
         powerups = pygame.sprite.Group()
-        bg = pygame.sprite.Group()
-        bg.add(Background())
+        all_sprites.add(Background(0))
+        all_sprites.add(Background(HEIGHT))
         player = Player()
         all_sprites.add(player)
         for _ in range(2):
@@ -382,10 +382,8 @@ while GAME:
 
     # Обновление спрайтов
     all_sprites.update()
-
     # Рендеринг
-    # screen.blit(background, background_rect)
-    bg.draw(screen)
+    screen.blit(background, background_rect)
     all_sprites.draw(screen)
     draw_text(screen, str(score), 19, WIDTH//2, 20)
     draw_shield_bar(screen, 5, 5, player.shield)
