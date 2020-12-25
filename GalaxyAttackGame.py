@@ -229,11 +229,12 @@ class Background (pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH / 2, -y + HEIGHT / 2)
         self.y = y
+        self.speedy = 6
         
     def update(self):
-        self.rect.y += 4
-        if self.rect.y >= HEIGHT*2:
-            self.rect.center = (WIDTH / 2, -self.y + HEIGHT / 2)
+        self.rect.y += self.speedy
+        if self.rect.y >= -self.y + HEIGHT:
+            self.rect.y = -self.y
 
 def new_mob():
     m = Mob()
@@ -275,7 +276,7 @@ def show_menu_screen():
     draw_text(screen, "GALAXY ATTACK!!!", 40, WIDTH/2, HEIGHT/4)
     draw_text(screen, "Keys \"A\" and \"D\" for movement", 20, WIDTH/2, HEIGHT/2)
     draw_text(screen, "Space to fire , \"K\" for super", 20, WIDTH/2, HEIGHT/2 + 40)
-    draw_text(screen, "Press any key to start", 22, WIDTH/2, HEIGHT*0.75)
+    draw_text(screen, "Press \"ENTER\" to start", 22, WIDTH/2, HEIGHT*0.75)
     pygame.display.flip()
     waiting = True
     while waiting:
@@ -284,7 +285,8 @@ def show_menu_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYUP:
-                waiting = False
+                if event.key == pygame.K_RETURN:
+                    waiting = False
     return menu_time
 
 # Цикл игры
@@ -300,8 +302,10 @@ while GAME:
         mobs = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
         powerups = pygame.sprite.Group()
-        all_sprites.add(Background(0))
-        all_sprites.add(Background(HEIGHT))
+        bg1 = Background(0)
+        bg2 = Background(HEIGHT)
+        all_sprites.add(bg1)
+        all_sprites.add(bg2)
         player = Player()
         all_sprites.add(player)
         for _ in range(2):
@@ -322,24 +326,38 @@ while GAME:
     if 10000 <= pygame.time.get_ticks() - menu_time <= 10016:
         for _ in range(2):
             new_mob()
-    if 20000 <= pygame.time.get_ticks() - menu_time <= 20016:
-       for _ in range(2):
-            new_mob()
-    if 30000 <= pygame.time.get_ticks() - menu_time <= 30016:
+        bg1.speedy = 8
+        bg2.speedy = 8
+    elif 20000 <= pygame.time.get_ticks() - menu_time <= 20016:
         for _ in range(2):
             new_mob()
-    if 40000 <= pygame.time.get_ticks() - menu_time <= 40016:
+        bg1.speedy = 10
+        bg2.speedy = 10
+    elif 30000 <= pygame.time.get_ticks() - menu_time <= 30016:
         for _ in range(2):
             new_mob()
-    if 70000 <= pygame.time.get_ticks() - menu_time <= 70016:
+        bg1.speedy = 12
+        bg2.speedy = 12
+    elif 40000 <= pygame.time.get_ticks() - menu_time <= 40016:
+        for _ in range(2):
+            new_mob()
+        bg1.speedy = 14
+        bg2.speedy = 14
+    elif 70000 <= pygame.time.get_ticks() - menu_time <= 70016:
         for _ in range(4):
             new_mob()
-    if 100000 <= pygame.time.get_ticks() - menu_time <= 100016:
+        bg1.speedy = 16
+        bg2.speedy = 16
+    elif 100000 <= pygame.time.get_ticks() - menu_time <= 100016:
         for _ in range(2):
             new_mob()
-    if 120000 <= pygame.time.get_ticks() - menu_time <= 120016:
+        bg1.speedy = 18
+        bg2.speedy = 18
+    elif 120000 <= pygame.time.get_ticks() - menu_time <= 120016:
         for _ in range(6):
             new_mob()
+        bg1.speedy = 20
+        bg2.speedy = 20
 
 
     # Проверка, не ударил ли моб игрока
