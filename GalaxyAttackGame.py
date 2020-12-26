@@ -27,7 +27,7 @@ main = os.path.dirname(__file__)
 img_folder = os.path.join(main, "img")
 snd_folder = os.path.join(main, "snd")
 
-background = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "black.png")).convert(), (WIDTH, HEIGHT))
+background = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "nebulawetstars.png")).convert(), (WIDTH, HEIGHT))
 background_rect = background.get_rect()
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25,19))
@@ -117,8 +117,8 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.speedx = 0
         keys = pygame.key.get_pressed()
-        if self.super and keys[pygame.K_k]:
-            self.super_shoot()
+        # if self.super and keys[pygame.K_k]:
+            # self.super_shoot()
         if keys[pygame.K_a]:
             self.speedx = -8
         if keys[pygame.K_d]:
@@ -133,7 +133,9 @@ class Player(pygame.sprite.Sprite):
             self.hidden = False
             self.rect.centerx = WIDTH // 2
             self.rect.bottom = HEIGHT-25
-        if self.super and now - self.super_timer >= 1500:
+        if self.super and not (now - self.super_timer >= 1500):
+            self.super_shoot()
+        else:
             self.super = False
         
 
