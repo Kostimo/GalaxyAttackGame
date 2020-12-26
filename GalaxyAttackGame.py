@@ -32,6 +32,8 @@ background_rect = background.get_rect()
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25,19))
 player_mini_img.set_colorkey(BLACK)
+accuracy_img = pygame.image.load(os.path.join(img_folder, "accuracy.png")).convert()
+accuracy_img.set_colorkey(BLACK)
 
 weapons = {
     "bullet": pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert(),
@@ -101,6 +103,7 @@ class Player(pygame.sprite.Sprite):
         all_sprites.add(bullet)
         bullets.add(bullet)
         shoot_sound.play()
+         
     
     def super_shoot(self):
         bullet = Bullet(self.rect.centerx+1, self.rect.top-2, "laser")
@@ -271,6 +274,12 @@ def draw_lives(surf, x, y, lives, img):
         img_rect.x = x + 30*i
         img_rect.y = y
         surf.blit(img, img_rect)
+# Точность игрока
+def draw_accuracy(surf, x, y, img): 
+    img_rect = img.get_rect()
+    img_rect.x = x
+    img_rect.y = y
+    surf.blit(img, img_rect)
 
 # Экран-меню
 def show_menu_screen():
@@ -313,6 +322,9 @@ while GAME:
         for _ in range(2):
             new_mob()
         score = 0
+        lucky_hits = 0 
+        number_of_shots = 0 
+        accuracy = 0
         
     pygame.mixer.music.set_volume(1)
     clock.tick(FPS)
@@ -324,6 +336,7 @@ while GAME:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 player.shoot()
+                number_of_shots += 1
 
     if 10000 <= pygame.time.get_ticks() - menu_time <= 10016:
         for _ in range(2):
@@ -380,6 +393,8 @@ while GAME:
     hits_with_bullets = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits_with_bullets:
         score += 50 - hit.radius
+        if hits_with_bullets[hit][0].type == "bullet":
+            lucky_hits += 1
         random.choice(expl_sounds).play()
         large_expl = Explosion(hit.rect.center, "large")
         all_sprites.add(large_expl)
@@ -400,15 +415,19 @@ while GAME:
             player.super = True
             player.super_timer = pygame.time.get_ticks()
 
+
+    if number_of_shots != 0:
+        accuracy = "%.2f" % (lucky_hits / number_of_shots * 100)
     # Обновление спрайтов
     all_sprites.update()
     # Рендеринг
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
-    draw_text(screen, str(score), 19, WIDTH//2, 20)
+    draw_text(screen, str(score), 20, WIDTH//2, 10)
+    draw_text(screen, str(accuracy)+"%", 14, 65, 23)
+    draw_accuracy(screen, 5, 20, accuracy_img)
     draw_shield_bar(screen, 5, 5, player.shield)
     draw_lives(screen, WIDTH-100, 5, player.lives, player_mini_img)
-
     # Обновление дисплея
     pygame.display.flip()
 
