@@ -11,6 +11,9 @@ FPS = 60
 BLACK = (0, 0, 0)
 WHITE_100 = (255, 255, 255)
 WHITE_90 = (230, 230, 230)
+WHITE_80 = (229, 233, 240)
+WHITE_70 = (216, 222, 233)
+
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
@@ -248,9 +251,9 @@ def new_mob():
 
 # Текст
 font_name = pygame.font.match_font("ObelixPro")
-def draw_text(surf, text, size, x, y):
+def draw_text(surf, text, color, size, x, y):
     font = pygame.font.Font(font_name, size)
-    surface_font = font.render(text, True, WHITE_90)
+    surface_font = font.render(text, True, color)
     surface_font_rect = surface_font.get_rect()
     surface_font_rect.midtop = (x,y)
     surf.blit(surface_font, surface_font_rect)
@@ -284,10 +287,10 @@ def draw_accuracy(surf, x, y, img):
 # Экран-меню
 def show_menu_screen():
     screen.blit(background, background_rect)
-    draw_text(screen, "GALAXY ATTACK!!!", 40, WIDTH/2, HEIGHT/4)
-    draw_text(screen, "Keys \"A\" and \"D\" for movement", 20, WIDTH/2, HEIGHT/2)
-    draw_text(screen, "Space to fire , \"K\" for super", 20, WIDTH/2, HEIGHT/2 + 40)
-    draw_text(screen, "Press \"ENTER\" to start", 22, WIDTH/2, HEIGHT*0.75)
+    draw_text(screen, "GALAXY ATTACK", WHITE_70, 40, WIDTH/2, HEIGHT/4)
+    draw_text(screen, "Keys \"A\" and \"D\" for movement, space to fire", WHITE_70, 16, WIDTH/2, HEIGHT/2)
+    draw_text(screen, "Collect special bonus for super", WHITE_70, 16, WIDTH/2, HEIGHT/2 + 40)
+    draw_text(screen, "Press \"ENTER\" to start", WHITE_70, 22, WIDTH/2, HEIGHT*0.75)
     pygame.display.flip()
     waiting = True
     while waiting:
@@ -299,6 +302,25 @@ def show_menu_screen():
                 if event.key == pygame.K_RETURN:
                     waiting = False
     return menu_time
+
+# Вывод статистики после проигрыша
+def show_statistics():
+    screen.blit(background, background_rect)
+    draw_text(screen, "STATISTICS", WHITE_80, 54, WIDTH/2, 80)
+    draw_text(screen, f"Score:  {score}", WHITE_80, 20, 101, HEIGHT/4.5 + 100)
+    draw_text(screen, f"Accuracy:  {accuracy}%", WHITE_80, 20, 140, HEIGHT/4.5 + 150)
+    time = "%.2f" % (pygame.time.get_ticks() / 1000)
+    draw_text(screen, f"Time:  {time} s", WHITE_80, 20, 115.5, HEIGHT/4.5 + 200)
+    draw_text(screen, "Press \"ENTER\" to continue", WHITE_80, 20, WIDTH/2, HEIGHT * 0.75)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_RETURN:
+                    waiting = False
 
 # Цикл игры
 MENU = True
@@ -329,6 +351,8 @@ while GAME:
     pygame.mixer.music.set_volume(1)
     clock.tick(FPS)
     if player.lives == 0 and not death_explosion.alive():
+        pygame.mixer.music.set_volume(0.2)
+        show_statistics()
         MENU = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -423,8 +447,8 @@ while GAME:
     # Рендеринг
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
-    draw_text(screen, str(score), 20, WIDTH//2, 10)
-    draw_text(screen, str(accuracy)+"%", 14, 65, 23)
+    draw_text(screen, str(score), WHITE_90, 20, WIDTH//2, 10)
+    draw_text(screen, str(accuracy)+"%", WHITE_90, 14, 65, 23)
     draw_accuracy(screen, 5, 20, accuracy_img)
     draw_shield_bar(screen, 5, 5, player.shield)
     draw_lives(screen, WIDTH-100, 5, player.lives, player_mini_img)
