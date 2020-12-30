@@ -30,7 +30,7 @@ main = os.path.dirname(__file__)
 img_folder = os.path.join(main, "img")
 snd_folder = os.path.join(main, "snd")
 
-background = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "nebulawetstars.png")).convert(), (WIDTH, HEIGHT))
+background = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "starfield2.jpg")).convert(), (WIDTH, HEIGHT))
 background_rect = background.get_rect()
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25,19))
@@ -307,7 +307,7 @@ def show_menu_screen():
 def show_statistics():
     screen.blit(background, background_rect)
     draw_text(screen, "STATISTICS", WHITE_80, 54, WIDTH/2, 80)
-    draw_text(screen, f"Score:  {score}", WHITE_80, 20, 101, HEIGHT/4.5 + 100)
+    draw_text(screen, f"Score:  {score}", WHITE_80, 20, 107, HEIGHT/4.5 + 100)
     draw_text(screen, f"Accuracy:  {accuracy}%", WHITE_80, 20, 140, HEIGHT/4.5 + 150)
     time = "%.2f" % (pygame.time.get_ticks() / 1000)
     draw_text(screen, f"Time:  {time} s", WHITE_80, 20, 115.5, HEIGHT/4.5 + 200)
