@@ -79,6 +79,8 @@ shoot_sound = pygame.mixer.Sound(os.path.join(snd_folder, "pew.wav"))
 expl_sounds = []
 for expl in ("expl1.wav", "expl2.wav"):
     expl_sounds.append(pygame.mixer.Sound(os.path.join(snd_folder, expl)))
+for snd in expl_sounds:
+    snd.set_volume(0.1)
 pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoop.mp3"))
 
 
@@ -105,6 +107,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top, "bullet")
         all_sprites.add(bullet)
         bullets.add(bullet)
+        shoot_sound.set_volume(0.1)
         shoot_sound.play()
          
     
@@ -112,6 +115,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx+1, self.rect.top-2, "laser")
         all_sprites.add(bullet)
         bullets.add(bullet)
+        shoot_sound.set_volume(0.1)
         shoot_sound.play()
 
     def hide(self):
@@ -123,8 +127,6 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.speedx = 0
         keys = pygame.key.get_pressed()
-        # if self.super and keys[pygame.K_k]:
-            # self.super_shoot()
         if keys[pygame.K_a]:
             self.speedx = -8
         if keys[pygame.K_d]:
@@ -331,7 +333,7 @@ pygame.mixer.music.play(loops=-1)
 while GAME:
     
     if MENU:
-        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.set_volume(0.02)
         MENU = False
         menu_time = show_menu_screen()
         all_sprites = pygame.sprite.Group()
@@ -354,10 +356,10 @@ while GAME:
     # Подсчет продолжительности игры
     game_time = pygame.time.get_ticks() - menu_time
 
-    pygame.mixer.music.set_volume(1)
+    pygame.mixer.music.set_volume(0.1)
     clock.tick(FPS)
     if player.lives == 0 and not death_explosion.alive():
-        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.set_volume(0.02)
         statistic_time = show_statistics(game_time)
         MENU = True
     for event in pygame.event.get():
