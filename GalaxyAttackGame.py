@@ -157,7 +157,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -60)
         self.speedx = random.randrange(-2, 2)
-        self.speedy = random.randrange(1, 9)
+        self.speedy = random.randrange(3, 9)
 
     def update(self):
         self.rect.y += self.speedy
@@ -166,7 +166,7 @@ class Mob(pygame.sprite.Sprite):
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -60)
             self.speedx = random.randrange(-2, 2)
-            self.speedy = random.randrange(1, 9)
+            self.speedy = random.randrange(3, 9)
 
 # Класс пули
 class Bullet(pygame.sprite.Sprite):
@@ -304,29 +304,32 @@ def show_menu_screen():
     return menu_time
 
 # Вывод статистики после проигрыша
-def show_statistics():
+def show_statistics(time):
     screen.blit(background, background_rect)
     draw_text(screen, "STATISTICS", WHITE_80, 54, WIDTH/2, 80)
     draw_text(screen, f"Score:  {score}", WHITE_80, 20, 107, HEIGHT/4.5 + 100)
     draw_text(screen, f"Accuracy:  {accuracy}%", WHITE_80, 20, 140, HEIGHT/4.5 + 150)
-    time = "%.2f" % (pygame.time.get_ticks() / 1000)
+    time = "%.2f" % (time / 1000)
     draw_text(screen, f"Time:  {time} s", WHITE_80, 20, 115.5, HEIGHT/4.5 + 200)
     draw_text(screen, "Press \"ENTER\" to continue", WHITE_80, 20, WIDTH/2, HEIGHT * 0.75)
     pygame.display.flip()
     waiting = True
     while waiting:
+        statistic_time = pygame.time.get_ticks()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RETURN:
                     waiting = False
+    return statistic_time
 
 # Цикл игры
 MENU = True
 GAME = True
 pygame.mixer.music.play(loops=-1)
 while GAME:
+    
     if MENU:
         pygame.mixer.music.set_volume(0.2)
         MENU = False
@@ -347,12 +350,15 @@ while GAME:
         lucky_hits = 0 
         number_of_shots = 0 
         accuracy = 0
-        
+    
+    # Подсчет продолжительности игры
+    game_time = pygame.time.get_ticks() - menu_time
+
     pygame.mixer.music.set_volume(1)
     clock.tick(FPS)
     if player.lives == 0 and not death_explosion.alive():
         pygame.mixer.music.set_volume(0.2)
-        show_statistics()
+        statistic_time = show_statistics(game_time)
         MENU = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -438,7 +444,6 @@ while GAME:
         if hit.type == "weapon":
             player.super = True
             player.super_timer = pygame.time.get_ticks()
-
 
     if number_of_shots != 0:
         accuracy = "%.2f" % (lucky_hits / number_of_shots * 100)
