@@ -115,7 +115,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx+1, self.rect.top-2, "laser")
         all_sprites.add(bullet)
         bullets.add(bullet)
-        shoot_sound.set_volume(0.1)
+        shoot_sound.set_volume(0.07)
         shoot_sound.play()
 
     def hide(self):
