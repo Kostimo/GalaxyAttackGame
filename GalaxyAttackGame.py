@@ -39,7 +39,7 @@ accuracy_img = pygame.image.load(os.path.join(img_folder, "accuracy.png")).conve
 accuracy_img.set_colorkey(BLACK)
 
 weapons = {
-    "bullet": pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert(),
+    "bullet": pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert(), (13, 35)),
     "laser": pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "laserRed.jpg")).convert(), (11,10))
 }
 
@@ -157,16 +157,16 @@ class Mob(pygame.sprite.Sprite):
         self.radius = int(self.rect.width*0.85//2)
         #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.x = random.randrange(WIDTH - self.rect.width)
-        self.rect.y = random.randrange(-100, -60)
+        self.rect.y = random.randrange(-200, -100)
         self.speedx = random.randrange(-2, 2)
         self.speedy = random.randrange(3, 9)
 
     def update(self):
         self.rect.y += self.speedy
         self.rect.x += self.speedx
-        if self.rect.top > HEIGHT + 10 or self.rect.left < (0-self.rect.width) or self.rect.right > (WIDTH + self.rect.width):
+        if self.rect.top > HEIGHT + 40 or self.rect.left < (-20-self.rect.width) or self.rect.right > (WIDTH + 20 + self.rect.width):
             self.rect.x = random.randrange(WIDTH - self.rect.width)
-            self.rect.y = random.randrange(-100, -60)
+            self.rect.y = random.randrange(-200, -100)
             self.speedx = random.randrange(-2, 2)
             self.speedy = random.randrange(3, 9)
 
