@@ -151,8 +151,9 @@ class Player(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = random.choice(meteor_images)
-        self.image.set_colorkey(BLACK)
+        self.image_original = random.choice(meteor_images)
+        self.image_original.set_colorkey(BLACK)
+        self.image = self.image_original.copy()
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width*0.85//2)
         #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
@@ -160,8 +161,20 @@ class Mob(pygame.sprite.Sprite):
         self.rect.y = random.randrange(-200, -100)
         self.speedx = random.randrange(-2, 2)
         self.speedy = random.randrange(3, 9)
+        self.rot = 0
+        self.rot_speed = random.randrange(-8, 8)
+        self.last_update = pygame.time.get_ticks()
+    
+    def rotate(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > 50:
+            self.last_update = now
+            self.rot += self.rot_speed % 360
+            self.image = pygame.transform.rotate(self.image_original, self.rot)
+
 
     def update(self):
+        self.rotate()
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         if self.rect.top > HEIGHT + 40 or self.rect.left < (-20-self.rect.width) or self.rect.right > (WIDTH + 20 + self.rect.width):
