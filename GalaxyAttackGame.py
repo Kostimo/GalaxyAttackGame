@@ -7,6 +7,10 @@ WIDTH = 480
 HEIGHT = 600
 FPS = 60
 
+score_list = [500, 1000, 2000, 5000, 7500, 10000, 15000, 16000]
+s = 0
+
+
 # Цвета (R, G, B)
 BLACK = (0, 0, 0)
 WHITE_100 = (255, 255, 255)
@@ -295,6 +299,7 @@ def draw_lives(surf, x, y, lives, img):
         img_rect.x = x + 30*i
         img_rect.y = y
         surf.blit(img, img_rect)
+
 # Точность игрока
 def draw_accuracy(surf, x, y, img): 
     img_rect = img.get_rect()
@@ -333,21 +338,20 @@ def show_statistics(time):
     pygame.display.flip()
     waiting = True
     while waiting:
-        statistic_time = pygame.time.get_ticks()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RETURN:
                     waiting = False
-    return statistic_time
 
 # Цикл игры
 MENU = True
 GAME = True
 pygame.mixer.music.play(loops=-1)
 while GAME:
-    
+    clock.tick(FPS)
+    pygame.mixer.music.set_volume(0.1)
     if MENU:
         pygame.mixer.music.set_volume(0.02)
         MENU = False
@@ -365,18 +369,18 @@ while GAME:
         for _ in range(2):
             new_mob()
         score = 0
+        s = 0
         lucky_hits = 0 
         number_of_shots = 0 
         accuracy = 0
     
-    # Подсчет продолжительности игры
+# Подсчет продолжительности игры
     game_time = pygame.time.get_ticks() - menu_time
 
-    pygame.mixer.music.set_volume(0.1)
-    clock.tick(FPS)
+
     if player.lives == 0 and not death_explosion.alive():
         pygame.mixer.music.set_volume(0.02)
-        statistic_time = show_statistics(game_time)
+        show_statistics(game_time)
         MENU = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -386,44 +390,65 @@ while GAME:
                 player.shoot()
                 number_of_shots += 1
 
-    if 10000 <= pygame.time.get_ticks() - menu_time <= 10016:
-        for _ in range(2):
-            new_mob()
-        bg1.speedy = 8
-        bg2.speedy = 8
-    elif 20000 <= pygame.time.get_ticks() - menu_time <= 20016:
-        for _ in range(2):
-            new_mob()
-        bg1.speedy = 10
-        bg2.speedy = 10
-    elif 30000 <= pygame.time.get_ticks() - menu_time <= 30016:
-        for _ in range(2):
-            new_mob()
-        bg1.speedy = 12
-        bg2.speedy = 12
-    elif 40000 <= pygame.time.get_ticks() - menu_time <= 40016:
-        for _ in range(2):
-            new_mob()
-        bg1.speedy = 14
-        bg2.speedy = 14
-    elif 70000 <= pygame.time.get_ticks() - menu_time <= 70016:
-        for _ in range(4):
-            new_mob()
-        bg1.speedy = 16
-        bg2.speedy = 16
-    elif 100000 <= pygame.time.get_ticks() - menu_time <= 100016:
-        for _ in range(2):
-            new_mob()
-        bg1.speedy = 18
-        bg2.speedy = 18
-    elif 120000 <= pygame.time.get_ticks() - menu_time <= 120016:
-        for _ in range(6):
-            new_mob()
-        bg1.speedy = 20
-        bg2.speedy = 20
+# Начало игры - 2 моба
+# 500 очков   - 4 моба
+# 1000 очков  - 6 мобов
+# 2000 очков  - 8 мобов
+# 5000 очков  - 10 мобов
+# 7500 очков  - 12 мобов
+# 10000 очков - 14 мобов
+# 15000 очков - 16 мобов
+# 20000 очков - 18 мобов
 
 
-    # Проверка, не ударил ли моб игрока
+# Повышение сложности в зависимости от колво очков
+    if s != len(score_list):
+        level = score_list[s]
+        if score >= level:
+            for _ in range(2):
+                new_mob()
+            bg1.speedy += 2
+            bg2.speedy += 2
+            s+=1
+
+# Повышение сложности в зависимости от времени
+    # if 10000 <= pygame.time.get_ticks() - menu_time <= 10016:
+    #     for _ in range(2):
+    #         new_mob()
+    #     bg1.speedy = 8
+    #     bg2.speedy = 8
+    # elif 20000 <= pygame.time.get_ticks() - menu_time <= 20016:
+    #     for _ in range(2):
+    #         new_mob()
+    #     bg1.speedy = 10
+    #     bg2.speedy = 10
+    # elif 30000 <= pygame.time.get_ticks() - menu_time <= 30016:
+    #     for _ in range(2):
+    #         new_mob()
+    #     bg1.speedy = 12
+    #     bg2.speedy = 12
+    # elif 40000 <= pygame.time.get_ticks() - menu_time <= 40016:
+    #     for _ in range(2):
+    #         new_mob()
+    #     bg1.speedy = 14
+    #     bg2.speedy = 14
+    # elif 70000 <= pygame.time.get_ticks() - menu_time <= 70016:
+    #     for _ in range(4):
+    #         new_mob()
+    #     bg1.speedy = 16
+    #     bg2.speedy = 16
+    # elif 100000 <= pygame.time.get_ticks() - menu_time <= 100016:
+    #     for _ in range(2):
+    #         new_mob()
+    #     bg1.speedy = 18
+    #     bg2.speedy = 18
+    # elif 120000 <= pygame.time.get_ticks() - menu_time <= 120016:
+    #     for _ in range(6):
+    #         new_mob()
+    #     bg1.speedy = 20
+    #     bg2.speedy = 20
+
+# Проверка, не ударил ли моб игрока
     hits_with_player = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
     for hit in hits_with_player:
         player.shield -= hit.radius*3
@@ -437,7 +462,7 @@ while GAME:
             player.shield = 100
             player.hide()
         
-    # Проверка столкновений пуль и мобов
+# Проверка столкновений пуль и мобов
     hits_with_bullets = pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits_with_bullets:
         score += 50 - hit.radius
@@ -452,7 +477,7 @@ while GAME:
              all_sprites.add(pow)
              powerups.add(pow)
              
-    # Проверка столкновений игрок и усилений
+# Проверка столкновений игрок и усилений
     hits_with_powerups = pygame.sprite.spritecollide(player, powerups, True)
     for hit in hits_with_powerups:
         if hit.type == "shield":
@@ -463,11 +488,13 @@ while GAME:
             player.super = True
             player.super_timer = pygame.time.get_ticks()
 
+# Подсчет точности игрока
     if number_of_shots != 0:
         accuracy = "%.2f" % (lucky_hits / number_of_shots * 100)
-    # Обновление спрайтов
+
+# Обновление спрайтов
     all_sprites.update()
-    # Рендеринг
+# Рендеринг
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     draw_text(screen, str(score), WHITE_90, 20, WIDTH//2, 10)
@@ -475,7 +502,7 @@ while GAME:
     draw_accuracy(screen, 5, 20, accuracy_img)
     draw_shield_bar(screen, 5, 5, player.shield)
     draw_lives(screen, WIDTH-100, 5, player.lives, player_mini_img)
-    # Обновление дисплея
+# Обновление дисплея
     pygame.display.flip()
 
 pygame.quit()
