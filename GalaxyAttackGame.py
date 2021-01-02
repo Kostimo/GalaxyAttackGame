@@ -7,7 +7,7 @@ WIDTH = 480
 HEIGHT = 600
 FPS = 60
 
-score_list = [500, 1000, 2000, 5000, 7500, 10000, 15000, 16000]
+score_list = [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000]
 s = 0
 
 
@@ -36,6 +36,7 @@ snd_folder = os.path.join(main, "snd")
 
 background = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "starfield2.jpg")).convert(), (WIDTH, HEIGHT))
 background_rect = background.get_rect()
+enemy_img = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "enemyGreen1.png")).convert(), (50,40))
 player_img = pygame.image.load(os.path.join(img_folder, "playerShip1_orange.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25,19))
 player_mini_img.set_colorkey(BLACK)
@@ -46,6 +47,7 @@ weapons = {
     "bullet": pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "laserRed07.png")).convert(), (13, 35)),
     "laser": pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "laserRed.jpg")).convert(), (11,10))
 }
+enemy_bullet = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "laserGreen13.png")).convert(), (13, 35))
 
 meteor_images = []
 meteor_images_list =['meteorBrown_big1.png','meteorBrown_med1.png',
@@ -140,6 +142,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
+
         now = pygame.time.get_ticks()
         if  self.hidden and now - self.hide_timer >= 1000:
             self.hidden = False
@@ -150,6 +153,43 @@ class Player(pygame.sprite.Sprite):
         else:
             self.super = False
         
+# Класс врага
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = enemy_img
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.speedx = 0
+        self.rect.y = -60
+        self.speedy = 3
+        self.shoot_delay = 300
+        self.last_shoot = pygame.time.get_ticks()
+
+    def shoot(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_shoot >= self.shoot_delay:
+            self.last_shoot = now
+            ebullet = enemyBullet(self.rect.centerx, self.rect.bottom)
+            enemy_bullets.add(ebullet)
+            all_sprites.add(ebullet)
+            shoot_sound.set_volume(0.09)
+            shoot_sound.play()
+
+    def update(self):
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+        if self.rect.top >= 25:
+            self.shoot()
+            self.speedy = 0
+            if self.rect.right >= WIDTH:
+                self.speedx = -3
+            if self.rect.left <= 0:
+                self.speedx = 3
+            
+                
+
 
 # Класс моба
 class Mob(pygame.sprite.Sprite):
@@ -190,7 +230,7 @@ class Mob(pygame.sprite.Sprite):
             self.speedx = random.randrange(-2, 2)
             self.speedy = random.randrange(3, 9)
 
-# Класс пули
+# Класс снарядов игрока
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, type):
         pygame.sprite.Sprite.__init__(self)
@@ -206,6 +246,23 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         # Убить, если  пуля заходит за верхнюю часть экрана
         if self.rect.bottom < 0:
+            self.kill()
+
+# Класс снарядов врага
+class enemyBullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = enemy_bullet
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.top = y
+        self.speedy = 10
+        
+    def update(self):
+        self.rect.y += self.speedy
+        # Убить, если  пуля заходит за нижнюю часть экрана
+        if self.rect.bottom > HEIGHT:
             self.kill()
 
 # Класс анимации взрывов
@@ -345,6 +402,8 @@ def show_statistics(time):
                 if event.key == pygame.K_RETURN:
                     waiting = False
 
+
+enemy_alive = False
 # Цикл игры
 MENU = True
 GAME = True
@@ -359,6 +418,7 @@ while GAME:
         all_sprites = pygame.sprite.Group()
         mobs = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
+        enemy_bullets = pygame.sprite.Group()
         powerups = pygame.sprite.Group()
         bg1 = Background(0)
         bg2 = Background(HEIGHT)
@@ -405,6 +465,10 @@ while GAME:
     if s != len(score_list):
         level = score_list[s]
         if score >= level:
+            if level == 5000 or level == 10000 or level == 15000 or level == 20000:
+                enemy = Enemy()
+                all_sprites.add(enemy)
+                enemy_alive = True
             for _ in range(2):
                 new_mob()
             bg1.speedy += 2
@@ -477,7 +541,7 @@ while GAME:
              all_sprites.add(pow)
              powerups.add(pow)
              
-# Проверка столкновений игрок и усилений
+# Проверка столкновений игрока и усилений
     hits_with_powerups = pygame.sprite.spritecollide(player, powerups, True)
     for hit in hits_with_powerups:
         if hit.type == "shield":
@@ -487,6 +551,30 @@ while GAME:
         if hit.type == "weapon":
             player.super = True
             player.super_timer = pygame.time.get_ticks()
+
+# Проверка столкновений игрока и вражеских снарядов
+    hits_with_enemybullets = pygame.sprite.spritecollide(player, enemy_bullets, True)
+    for hit in hits_with_enemybullets:
+        player.shield -= 30
+        small_expl = Explosion(hit.rect.center, "small")
+        all_sprites.add(small_expl)
+        if player.shield <= 0:
+            death_explosion = Explosion(player.rect.center, "player")
+            all_sprites.add(death_explosion)
+            player.lives -= 1
+            player.shield = 100
+            player.hide()
+
+# Проверка столкновений врага и снарядов игрока
+    if enemy_alive:
+        enemy_and_bullets = pygame.sprite.spritecollide(enemy, bullets, True)
+        for hit in enemy_and_bullets:
+            score += 1000
+            enemy.kill()
+            enemy_alive = False
+            death_explosion = Explosion(enemy.rect.center, "player")
+            all_sprites.add(death_explosion)
+
 
 # Подсчет точности игрока
     if number_of_shots != 0:
