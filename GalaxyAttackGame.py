@@ -188,9 +188,6 @@ class Enemy(pygame.sprite.Sprite):
             if self.rect.left <= 0:
                 self.speedx = 3
             
-                
-
-
 # Класс моба
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
@@ -465,7 +462,7 @@ while GAME:
     if s != len(score_list):
         level = score_list[s]
         if score >= level:
-            if level == 5000 or level == 10000 or level == 15000 or level == 20000:
+            if level == 5000 or level == 7500 or level == 10000 or level == 15000 or level == 20000:
                 enemy = Enemy()
                 all_sprites.add(enemy)
                 enemy_alive = True
@@ -555,7 +552,7 @@ while GAME:
 # Проверка столкновений игрока и вражеских снарядов
     hits_with_enemybullets = pygame.sprite.spritecollide(player, enemy_bullets, True)
     for hit in hits_with_enemybullets:
-        player.shield -= 30
+        player.shield -= 45
         small_expl = Explosion(hit.rect.center, "small")
         all_sprites.add(small_expl)
         if player.shield <= 0:
@@ -569,12 +566,10 @@ while GAME:
     if enemy_alive:
         enemy_and_bullets = pygame.sprite.spritecollide(enemy, bullets, True)
         for hit in enemy_and_bullets:
-            score += 1000
             enemy.kill()
             enemy_alive = False
             death_explosion = Explosion(enemy.rect.center, "player")
             all_sprites.add(death_explosion)
-
 
 # Подсчет точности игрока
     if number_of_shots != 0:
