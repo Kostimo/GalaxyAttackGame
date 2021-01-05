@@ -8,7 +8,6 @@ HEIGHT = 600
 FPS = 60
 
 score_list = [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000]
-s = 0
 
 
 # Цвета (R, G, B)
@@ -426,7 +425,6 @@ while GAME:
         for _ in range(2):
             new_mob()
         score = 0
-        s = 0
         lucky_hits = 0 
         number_of_shots = 0 
         accuracy = 0
@@ -459,8 +457,8 @@ while GAME:
 
 
 # Повышение сложности в зависимости от колво очков
-    if s != len(score_list):
-        level = score_list[s]
+    if len(score_list) != 0:
+        level = score_list[0]
         if score >= level:
             if level == 5000 or level == 7500 or level == 10000 or level == 15000 or level == 20000:
                 enemy = Enemy()
@@ -470,7 +468,7 @@ while GAME:
                 new_mob()
             bg1.speedy += 2
             bg2.speedy += 2
-            s+=1
+            score_list.pop(0)
 
 # Повышение сложности в зависимости от времени
     # if 10000 <= pygame.time.get_ticks() - menu_time <= 10016:
