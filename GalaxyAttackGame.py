@@ -31,7 +31,7 @@ clock = pygame.time.Clock()
 # Загрузка всей игровой графики
 main = os.path.dirname(__file__)
 img_folder = os.path.join(main, "img")
-snd_folder = os.path.join(main, "snd")
+sound_folder = os.path.join(main, "sound")
 
 background = pygame.transform.scale(pygame.image.load(os.path.join(img_folder, "starfield2.jpg")).convert(), (WIDTH, HEIGHT))
 background_rect = background.get_rect()
@@ -80,13 +80,13 @@ powerup_images = {
 }
 
 # Загрузка мелодий игры 
-shoot_sound = pygame.mixer.Sound(os.path.join(snd_folder, "pew.wav"))
+shoot_sound = pygame.mixer.Sound(os.path.join(sound_folder, "pew.wav"))
 expl_sounds = []
 for expl in ("expl1.wav", "expl2.wav"):
-    expl_sounds.append(pygame.mixer.Sound(os.path.join(snd_folder, expl)))
+    expl_sounds.append(pygame.mixer.Sound(os.path.join(sound_folder, expl)))
 for snd in expl_sounds:
     snd.set_volume(0.1)
-pygame.mixer.music.load(os.path.join(snd_folder, "tgfcoder-FrozenJam-SeamlessLoop.mp3"))
+pygame.mixer.music.load(os.path.join(sound_folder, "tgfcoder-FrozenJam-SeamlessLoop.ogg"))
 
 
 # Класс игрока
