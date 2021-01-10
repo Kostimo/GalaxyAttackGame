@@ -425,6 +425,7 @@ while GAME:
         for _ in range(2):
             new_mob()
         score = 0
+        score_list = [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000]
         lucky_hits = 0 
         number_of_shots = 0 
         accuracy = 0
